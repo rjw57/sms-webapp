@@ -1,7 +1,7 @@
 FROM python:3.6-alpine
 
 # Ensure packages are up to date and install some useful utilities
-RUN apk update && apk add \
+RUN apk add --no-cache \
 	postgresql-dev git vim libffi-dev gcc musl-dev libxml2-dev \
 	libxslt-dev
 

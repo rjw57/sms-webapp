@@ -1,19 +1,24 @@
-image: docker:latest
+image: docker:stable
 
 services:
-  - docker:dind
+  - docker:stable-dind
 
 # before_script:
 
 stages:
-  - build
+  - test
+  - build_image
 
-build:
-  stage: build
+test:
   script:
-    - docker build -t sms-webapp:${CI_COMMIT_SHA} .
-  variables:
-    APP_NAME: pidashboard
-    APP_ENV: test
-  tags:
-    - docker
+    - apk add --no-cache py-pip
+    - pip install docker-compose
+    - docker-compose run --rm tox
+
+build_image:
+  image: google/cloud-sdk:latest
+  script:
+    - echo "${GCLOUD_CREDENTIALS}" >service-account.json
+    - gcloud auth activate-service-account --key-file=service-account.json
+    - gcloud config set project university-media-service
+    - gcloud container builds submit --tag gcr.io/university-media/service/sms-webapp:${CI_COMMIT_SHA} .
