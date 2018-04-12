@@ -1,0 +1,7 @@
+# Deployment-specific requirements
+
+# IPython is useful when running ./migrate.py shell within the container
+ipython
+
+# gunicorn is used for serving the WSGI application
+gunicorn
