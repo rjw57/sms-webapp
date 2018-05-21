@@ -5,11 +5,31 @@
 #   docker-compose -f compose/base.yml -f compose/development.yml
 version: '3.2'
 services:
-  # Main web application service
-  development_app:
+  # Web frontend
+  frontend_app:
     build:
       context: ..
-      dockerfile: ./compose/development.Dockerfile
+      dockerfile: ./compose/development.frontend.Dockerfile
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - "django_app"
+    # For the frontend, mount the local frontend directory inside the container
+    # as a volume to allow local changes to be reflected without having to
+    # re-build the container.
+    volumes:
+      - type: bind
+        source: ../frontend/
+        target: /usr/src/app
+        read_only: true
+
+  # Main web application service
+  django_app:
+    build:
+      context: ..
+      dockerfile: ./compose/development.django.Dockerfile
     expose:
       - "8080"
     ports:
