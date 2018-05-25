@@ -26,11 +26,17 @@ const ProfileButton = withProfile(({ profile, ...otherProps }) => {
 
   if(profile.is_anonymous) {
     return (
-      <Button component='a' href={profile.urls.login} {...otherProps}>Login</Button>
+      <Button component='a' href={profile.urls.login} {...otherProps}>
+        Login
+      </Button>
     );
   }
 
-  return (<Button {...otherProps}>{ profile.username }</Button>);
+  return (
+    <Button {...otherProps}>
+      { profile.username }
+    </Button>
+  );
 });
 
 class IndexPage extends Component {
@@ -156,13 +162,13 @@ class IndexPage extends Component {
         <AppBar position="static">
           <Grid container component={Toolbar} classes={{root: classes.toolBarRoot}}>
             <Hidden smDown>
-              <Grid item xs={2} className={classes.toolBarLeft}>
-                <Typography variant="title" color="inherit">
-                  Media&nbsp;Service
-                </Typography>
+              <Grid item xs={0} md={3} lg={2} lassName={classes.toolBarLeft}>
+                  <Typography variant="title" color="inherit">
+                    Media&nbsp;Service
+                  </Typography>
               </Grid>
             </Hidden>
-            <Grid item md={8} xs={9} className={classes.toolBarMiddle}>
+            <Grid item xs={12} sm={9} md={6} lg={8} className={classes.toolBarMiddle}>
               <SearchForm
                 classes={{root: classes.searchFormRoot}}
                 onSubmit={event => this.handleSubmit(event)}
@@ -171,9 +177,11 @@ class IndexPage extends Component {
                 }}
               />
             </Grid>
-            <Grid item md={2} xs={3} className={classes.toolBarRight}>
-              <ProfileButton color='inherit' />
-            </Grid>
+            <Hidden xsDown>
+              <Grid item xs={0} sm={3} lg={2} className={classes.toolBarRight}>
+                <ProfileButton size='large' color='inherit' />
+              </Grid>
+            </Hidden>
           </Grid>
         </AppBar>
 
@@ -214,11 +222,11 @@ const styles = theme => ({
   },
 
   body: {
-    maxWidth: '960px',
+    // maxWidth: '960px',
     boxSizing: 'content-box',
     margin: [[0, 'auto']],
-    paddingLeft: theme.spacing.unit * 3,
-    paddingRight: theme.spacing.unit * 3,
+    paddingLeft: theme.spacing.unit * 2,
+    paddingRight: theme.spacing.unit * 2,
     paddingTop: theme.spacing.unit * 3,
   },
 
@@ -247,9 +255,8 @@ const styles = theme => ({
   },
 
   searchFormRoot: {
+    width: '100%',
     maxWidth: '960px',
-    flexBasis: '960px',
-
   },
 });
 

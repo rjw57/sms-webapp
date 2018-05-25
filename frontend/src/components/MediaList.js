@@ -38,7 +38,7 @@ const MediaList = ({ classes, maxItemCount, contentLoading, mediaItems }) => {
   return (
     <Grid container spacing={16}>
       { mediaItemComponents.map((item, index) => (
-        <Grid item xs={12} sm={6} md={4} key={index}>{ item }</Grid>
+        <Grid item xs={12} sm={6} md={4} lg={3} key={index}>{ item }</Grid>
       )) }
     </Grid>
   );

@@ -10,19 +10,18 @@ import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
   root: {
-    boxShadow: theme.shadows[2],
     display: 'flex',
+    border: [[
+      '1px', 'solid', 'rgba(255,255,255,0.25)'
+    ]],
+    borderRadius: theme.spacing.unit * 0.5,
+    overflow: 'hidden',
   },
 
   searchInputRoot: {
     height: theme.spacing.unit * 5,
-    backgroundColor: theme.palette.background.paper,
-    border: [[
-      '1px', 'solid', 'rgba(0, 0, 0, 0.15)',
-    ]],
-    borderRight: 'none',
-    borderTopLeftRadius: theme.spacing.unit * 0.25,
-    borderBottomLeftRadius: theme.spacing.unit * 0.25,
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.primary.contrastText,
     padding: [[ theme.spacing.unit, theme.spacing.unit*2 ]],
   },
 
@@ -37,14 +36,11 @@ const styles = theme => ({
     padding: 0,
     minWidth: theme.spacing.unit * 6,
     boxShadow: 'none',
-
     borderRadius: 0,
-    borderTopRightRadius: theme.spacing.unit * 0.25,
-    borderBottomRightRadius: theme.spacing.unit * 0.25,
   },
 })
 
-const SearchForm = ({ classes, InputProps, ...otherProps }) => (
+const SearchForm = ({ classes, InputProps, ButtonProps, ...otherProps }) => (
   <form className={classes.root} {...otherProps}>
     <Input
       disableUnderline fullWidth autoFocus
@@ -58,6 +54,7 @@ const SearchForm = ({ classes, InputProps, ...otherProps }) => (
       variant='raised' size='large' color='primary'
       classes={{root: classes.searchButtonRoot}}
       type='submit'
+      {...ButtonProps}
     >
       <Search />
     </Button>
@@ -67,10 +64,12 @@ const SearchForm = ({ classes, InputProps, ...otherProps }) => (
 SearchForm.propTypes = {
   classes: PropTypes.object.isRequired,
   InputProps: PropTypes.object,
+  ButtonProps: PropTypes.object,
 };
 
 SearchForm.defaultProps = {
   InputProps: {},
+  ButtonProps: {},
 };
 
 export default withStyles(styles)(SearchForm);

@@ -42,7 +42,6 @@ const styles = theme => ({
   descriptionContent: {
     display: 'block',
     position: 'relative',
-    wordBreak: 'break-all',
     height: '4em',
   },
   descriptionEllipsis: {
