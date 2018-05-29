@@ -41,10 +41,10 @@ services:
       - "hydra"
       - "lookupproxy"
       - "frontend_watch"
-    # For devserver, mount the local directory inside the container as a volume
-    # to allow local changes to be reflected without having to re-build the
-    # container.
     volumes:
+      # For devserver, mount the local directory inside the container as a volume
+      # to allow local changes to be reflected without having to re-build the
+      # container.
       - type: bind
         source: ../
         target: /usr/src/app
