@@ -9,7 +9,7 @@ class ProfileProvider extends Component {
   }
 
   componentWillMount() {
-    fetch('/api/profile', { credentials: 'include' }).then(r => r.json()).then(
+    fetch('/api/profile/', { credentials: 'include' }).then(r => r.json()).then(
       profile => this.setState({ profile })
     );
   }

@@ -61,7 +61,7 @@ class IndexPage extends Component {
 
   fetchLatestMediaList() {
     this.setState({ latestMediaLoading: true });
-    fetch('/api/media', { credentials: 'include' }).then(r => r.json()).then(
+    fetch('/api/media/', { credentials: 'include' }).then(r => r.json()).then(
       response => this.setState({
         latestMediaLoading: false,
         latestMediaResponse: response,
@@ -74,7 +74,7 @@ class IndexPage extends Component {
     params.append('search', query);
 
     this.setState({ searchResultMediaLoading: true });
-    fetch('/api/media?' + params, { credentials: 'include' }).then(r => r.json()).then(
+    fetch('/api/media/?' + params, { credentials: 'include' }).then(r => r.json()).then(
       response => this.setState({
         searchResultMediaLoading: false,
         searchResultMediaResponse: response,

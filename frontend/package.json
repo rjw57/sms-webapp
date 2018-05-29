@@ -15,11 +15,15 @@
     "watch": "node scripts/watch.js",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "styleguidist-server": "styleguidist server"
   },
   "proxy": {
     "/(api|accounts|raven_return)/": {
-      "target": "http://django_app:8080"
+      "target": "http://development_app:8080"
     }
+  },
+  "devDependencies": {
+    "react-styleguidist": "^7.0.14"
   }
 }
