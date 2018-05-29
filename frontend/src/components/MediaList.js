@@ -9,7 +9,15 @@ import { withStyles } from '@material-ui/core/styles';
 import MediaItemCard from './MediaItemCard';
 import MediaItemCardContentLoader from './MediaItemCardContentLoader';
 
-const MediaList = ({ classes, maxItemCount, contentLoading, mediaItems }) => {
+/**
+ * A list of media items within a ``Grid``. Each item is a ``Grid`` item and the root element
+ * itself is a ``Grid`` container. Each media item is a clickable link.
+ *
+ * Any unknown properties supplied will be spread to the root component.
+ */
+const MediaList = ({
+  classes, maxItemCount, contentLoading, mediaItems, GridItemProps, ...otherProps
+}) => {
   let mediaItemComponents;
 
   if(!contentLoading) {
@@ -36,29 +44,46 @@ const MediaList = ({ classes, maxItemCount, contentLoading, mediaItems }) => {
   }
 
   return (
-    <Grid container spacing={16}>
+    <Grid container spacing={16} {...otherProps}>
       { mediaItemComponents.map((item, index) => (
-        <Grid item xs={12} sm={6} md={4} lg={3} key={index}>{ item }</Grid>
+        <Grid item xs={12} sm={6} md={4} lg={3} key={index} {...GridItemProps}>{ item }</Grid>
       )) }
     </Grid>
   );
 }
 
 MediaList.propTypes = {
+  /** @ignore */
   classes: PropTypes.object.isRequired,
+
+  /** Maximum item count to display. If unset, all items will be displayed. */
   maxItemCount: PropTypes.number,
+
+  /** Display maxItemCount content loading indicators instead of the media items. */
   contentLoading: PropTypes.bool,
+
+  /** Array of media items to show. */
   mediaItems: PropTypes.arrayOf(PropTypes.shape({
+    /** URL representing media item used as link target. */
     url: PropTypes.string.isRequired,
+
+    /** Title of media item. */
     title: PropTypes.string.isRequired,
+
+    /** Description of media item. */
     description: PropTypes.string,
+
+    /** URL of image representing media item. */
     imageUrl: PropTypes.string.isRequired,
+
+    /** Some label used to indicate media item is special in some way. */
     label: PropTypes.string,
   })),
 };
 
 MediaList.defaultProps = {
   contentLoading: false,
+  GridItemProps: { xs: 4 },
   mediaItems: [],
 };
 
@@ -69,9 +94,6 @@ const styles = theme => ({
     justifyContent: 'space-around',
     overflow: 'hidden',
     backgroundColor: theme.palette.background.paper,
-  },
-  icon: {
-    color: 'rgba(255, 255, 255, 0.54)',
   },
   buttonRoot: {
     '&:hover': {

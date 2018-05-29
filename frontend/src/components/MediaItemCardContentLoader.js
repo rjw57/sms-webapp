@@ -4,6 +4,11 @@ import ContentLoader from 'react-content-loader';
 
 import { withTheme } from '@material-ui/core/styles';
 
+/**
+ * A ``ContentLoader`` placeholder designed to mimic the appearance of a ``MediaItemCard``.
+ *
+ * Any unknown properties supplied will be spread to the root component.
+ */
 const MediaItemCardContentLoader = ({ theme, ...otherProps }) => (
   <ContentLoader
     width={300} height={270}
@@ -19,6 +24,7 @@ const MediaItemCardContentLoader = ({ theme, ...otherProps }) => (
 );
 
 MediaItemCardContentLoader.propTypes = {
+  /** @ignore */
   theme: PropTypes.object.isRequired,
 };
 

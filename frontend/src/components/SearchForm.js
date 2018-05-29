@@ -8,20 +8,83 @@ import Search from '@material-ui/icons/Search';
 
 import { withStyles } from '@material-ui/core/styles';
 
+/**
+ * A combined input field and submit button providing a horizontal search control form.
+ *
+ * Any unknown properties supplied will be spread to the root component.
+ */
+const SearchForm = ({
+  classes, component: Component, InputProps, ButtonProps, color, ...otherProps
+}) => (
+  <Component
+    className={[
+      classes.root,
+      color === 'primary' ? classes.colorPrimary : null,
+      color === 'secondary' ? classes.colorSecondary : null
+    ].join(' ')}
+    {...otherProps}
+  >
+    <Input
+      disableUnderline fullWidth autoFocus
+      type='search'
+      classes={{
+        root: classes.searchInputRoot, input: classes.searchInputInput,
+      }}
+      {...InputProps}
+    />
+    <Button
+      variant='raised' size='large' color={color}
+      classes={{root: classes.searchButtonRoot}}
+      type='submit'
+      {...ButtonProps}
+    >
+      <Search />
+    </Button>
+  </Component>
+);
+
+SearchForm.propTypes = {
+  /** @ignore */
+  classes: PropTypes.object.isRequired,
+
+  /** The color of the component. */
+  color: PropTypes.oneOf(['default', 'primary', 'secondary']),
+
+  /** Base component for the control. */
+  component: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+
+  /** Props passed to the ``Input`` element implementing the search field. */
+  InputProps: PropTypes.object,
+
+  /** Props passed to the ``Button`` element implementing the submit button. */
+  ButtonProps: PropTypes.object,
+};
+
+SearchForm.defaultProps = {
+  component: 'form',
+  color: 'default',
+};
+
 const styles = theme => ({
   root: {
     display: 'flex',
     border: [[
-      '1px', 'solid', 'rgba(255,255,255,0.25)'
+      1, 'solid', theme.palette.divider,
     ]],
     borderRadius: theme.spacing.unit * 0.5,
     overflow: 'hidden',
   },
 
+  colorPrimary: {
+    borderColor: theme.palette.primary.main,
+  },
+
+  colorSecondary: {
+    borderColor: theme.palette.primary.main,
+  },
+
   searchInputRoot: {
-    height: theme.spacing.unit * 5,
-    backgroundColor: theme.palette.primary.dark,
-    color: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.background.paper,
     padding: [[ theme.spacing.unit, theme.spacing.unit*2 ]],
   },
 
@@ -39,37 +102,5 @@ const styles = theme => ({
     borderRadius: 0,
   },
 })
-
-const SearchForm = ({ classes, InputProps, ButtonProps, ...otherProps }) => (
-  <form className={classes.root} {...otherProps}>
-    <Input
-      disableUnderline fullWidth autoFocus
-      type='search'
-      classes={{
-        root: classes.searchInputRoot, input: classes.searchInputInput,
-      }}
-      {...InputProps}
-    />
-    <Button
-      variant='raised' size='large' color='primary'
-      classes={{root: classes.searchButtonRoot}}
-      type='submit'
-      {...ButtonProps}
-    >
-      <Search />
-    </Button>
-  </form>
-);
-
-SearchForm.propTypes = {
-  classes: PropTypes.object.isRequired,
-  InputProps: PropTypes.object,
-  ButtonProps: PropTypes.object,
-};
-
-SearchForm.defaultProps = {
-  InputProps: {},
-  ButtonProps: {},
-};
 
 export default withStyles(styles)(SearchForm);

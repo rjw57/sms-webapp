@@ -1,43 +1,44 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import AppBar from '@material-ui/core/AppBar';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import Hidden from '@material-ui/core/Hidden';
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
 import { withStyles } from '@material-ui/core/styles';
 
-import MediaListSection from '../components/MediaListSection';
-import SearchForm from '../components/SearchForm';
+import AppBar from '../components/AppBar';
+import MediaList from '../components/MediaList';
 
 import CollectionDefaultImage from './collection-default-image.jpg';
 
 import withRoot from '../withRoot';
 
-import withProfile from '../contexts/profile';
+import withSearchResults, { SearchResultsProvider } from '../contexts/searchResults';
 
 const MAX_COLLECTION_RESULTS = 3;
 
-const ProfileButton = withProfile(({ profile, ...otherProps }) => {
-  if(!profile) { return null; }
+const MediaListSection = ({ title, MediaListProps, ...otherProps }) => (
+  <section {...otherProps}>
+    <Typography variant='headline' gutterBottom>
+      { title }
+    </Typography>
+    <Typography component='div' paragraph>
+      <MediaList
+        GridItemProps={{ xs: 12, sm: 6, md: 4, lg: 3 }}
+        maxItemCount={18}
+        {...MediaListProps}
+      />
+    </Typography>
+  </section>
+);
 
-  if(profile.is_anonymous) {
-    return (
-      <Button component='a' href={profile.urls.login} {...otherProps}>
-        Login
-      </Button>
-    );
-  }
-
-  return (
-    <Button {...otherProps}>
-      { profile.username }
-    </Button>
-  );
-});
+const SearchResults = withSearchResults(({
+  query, mediaResults, collectionResults, isLoading
+}) => (
+  <MediaListSection
+    title="Search Results"
+    contentLoading={isLoading}
+  />
+));
 
 class IndexPage extends Component {
   constructor() {
@@ -46,12 +47,7 @@ class IndexPage extends Component {
     this.state = {
       latestMediaLoading: false,
       latestMediaResponse: null,
-
-      searchResultMediaLoading: false,
-      searchResultMediaResponse: null,
-
-      searchResultCollectionsLoading: false,
-      searchResultCollectionsResponse: null,
+      query: null,
     }
   }
 
@@ -69,37 +65,8 @@ class IndexPage extends Component {
     );
   }
 
-  search(query) {
-    const params = new URLSearchParams();
-    params.append('search', query);
-
-    this.setState({ searchResultMediaLoading: true });
-    fetch('/api/media/?' + params, { credentials: 'include' }).then(r => r.json()).then(
-      response => this.setState({
-        searchResultMediaLoading: false,
-        searchResultMediaResponse: response,
-      })
-    );
-
-    this.setState({ searchResultCollectionsLoading: true });
-    fetch('/api/collections?' + params, { credentials: 'include' }).then(r => r.json()).then(
-      response => this.setState({
-        searchResultCollectionsLoading: false,
-        searchResultCollectionsResponse: response,
-      })
-    );
-  }
-
-  handleSubmit(event) {
-    event.preventDefault();
-
-    const formElement = event.target;
-    const inputElement = Array.from(formElement.elements).filter(element => element.name === 'q')[0];
-    if(!inputElement) { return; }
-
-    const query = inputElement.value;
-    if(!query) { return; }
-    this.search(query);
+  handleSearch(q) {
+    this.setState({ query: { q } });
   }
 
   render() {
@@ -150,51 +117,32 @@ class IndexPage extends Component {
     ) ? (
       <MediaListSection
         title='Search Results'
-        contentLoading={searchResultMediaLoading || searchResultCollectionsLoading}
-        mediaItems={searchResultItems}
-        classes={{ root: classes.section }}
-        maxItemCount={18}
+        className={classes.mediaListSection}
+        MediaListProps={{
+          contentLoading: searchResultMediaLoading || searchResultCollectionsLoading,
+          mediaItems: searchResultItems,
+        }}
       />
     ) : null;
 
     return (
       <div className={ classes.page }>
-        <AppBar position="static">
-          <Grid container component={Toolbar} classes={{root: classes.toolBarRoot}}>
-            <Hidden smDown>
-              <Grid item xs={0} md={3} lg={2} lassName={classes.toolBarLeft}>
-                  <Typography variant="title" color="inherit">
-                    Media&nbsp;Service
-                  </Typography>
-              </Grid>
-            </Hidden>
-            <Grid item xs={12} sm={9} md={6} lg={8} className={classes.toolBarMiddle}>
-              <SearchForm
-                classes={{root: classes.searchFormRoot}}
-                onSubmit={event => this.handleSubmit(event)}
-                InputProps={{
-                  placeholder: 'Search', name: 'q',
-                }}
-              />
-            </Grid>
-            <Hidden xsDown>
-              <Grid item xs={0} sm={3} lg={2} className={classes.toolBarRight}>
-                <ProfileButton size='large' color='inherit' />
-              </Grid>
-            </Hidden>
-          </Grid>
-        </AppBar>
+        <AppBar onSearch={q => this.handleSearch(q)} />
 
         <div className={classes.body}>
+          <SearchResultsProvider query={this.state.query}>
+            <SearchResults />
+          </SearchResultsProvider>
 
           { renderedSearchResult }
 
           <MediaListSection
             title='Latest Media'
-            contentLoading={latestMediaLoading}
-            mediaItems={latestMedia}
-            classes={{ root: classes.section }}
-            maxItemCount={12}
+            className={classes.mediaListSection}
+            MediaListProps={{
+              contentLoading: latestMediaLoading,
+              mediaItems: latestMedia,
+            }}
           />
         </div>
       </div>
@@ -230,33 +178,8 @@ const styles = theme => ({
     paddingTop: theme.spacing.unit * 3,
   },
 
-  section: {
+  mediaListSection: {
     marginBottom: theme.spacing.unit * 2,
-  },
-
-  toolBarRoot: {
-  },
-
-  toolBarLeft: {
-    display: 'flex',
-    justifyContent: 'flex-start',
-    paddingRight: theme.spacing.unit * 3,
-  },
-
-  toolBarMiddle: {
-    display: 'flex',
-    justifyContent: 'center',
-  },
-
-  toolBarRight: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    paddingLeft: theme.spacing.unit * 3,
-  },
-
-  searchFormRoot: {
-    width: '100%',
-    maxWidth: '960px',
   },
 });
 
