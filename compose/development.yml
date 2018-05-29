@@ -3,30 +3,31 @@
 # Extends compose/base.yml so launch services via:
 #
 #   docker-compose -f compose/base.yml -f compose/development.yml
-version: '3.2'
-services:
-  # Web frontend
-  frontend_app:
-    build:
-      context: ..
-      dockerfile: ./compose/development.frontend.Dockerfile
-    expose:
-      - "3000"
-    ports:
-      - "3000:3000"
-    depends_on:
-      - "django_app"
+version: '3.4'
+
+# Template common configuration for the frontend containers.
+#
+# See: https://docs.docker.com/compose/compose-file/#extension-fields
+x-frontend-template: &frontend-template
+  build:
+    context: ..
+    dockerfile: ./compose/development.frontend.Dockerfile
+
+  volumes:
     # For the frontend, mount the local frontend directory inside the container
     # as a volume to allow local changes to be reflected without having to
     # re-build the container.
-    volumes:
-      - type: bind
-        source: ../frontend/
-        target: /usr/src/app
-        read_only: true
+    - type: bind
+      source: ../frontend/
+      target: /usr/src/app/
+      read_only: true
 
+    # This volume is only used by some frontend services
+    - "frontend_build:/tmp/frontend_build"
+
+services:
   # Main web application service
-  django_app:
+  development_app:
     build:
       context: ..
       dockerfile: ./compose/development.django.Dockerfile
@@ -39,6 +40,7 @@ services:
       - "mailhog"
       - "hydra"
       - "lookupproxy"
+      - "frontend_watch"
     # For devserver, mount the local directory inside the container as a volume
     # to allow local changes to be reflected without having to re-build the
     # container.
@@ -47,14 +49,42 @@ services:
         source: ../
         target: /usr/src/app
         read_only: true
+      - "frontend_build:/tmp/frontend_build"
     environment:
       # Teleport JWPlatform credentials and configuration from host environment.
       JWPLATFORM_API_KEY: "${JWPLATFORM_API_KEY}"
       JWPLATFORM_API_SECRET: "${JWPLATFORM_API_SECRET}"
       JWPLATFORM_EMBED_PLAYER_KEY: "${JWPLATFORM_EMBED_PLAYER_KEY}"
+      DJANGO_FRONTEND_APP_BUILD_DIR: "/tmp/frontend_build"
     env_file:
       - base.env
       - development.env
+
+  # Front end using the default webpack development server which allows
+  # hot-reloading, etc.
+  frontend:
+    <<: *frontend-template
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+
+  # Front end which is continually re-build using webpack's watch support. Used
+  # to provide an updated source of files for the Django app.
+  frontend_watch:
+    <<: *frontend-template
+    command: ["run", "watch"]
+    environment:
+      APP_BUILD: "/tmp/frontend_build"
+
+  # Front end live documentation
+  frontend_styleguidist:
+    <<: *frontend-template
+    expose:
+      - "6060"
+    ports:
+      - "6060:6060"
+    command: ["run", "styleguidist-server"]
 
   # Swagger
   swagger:
@@ -65,3 +95,6 @@ services:
       - "7000:8080"
     environment:
       API_URL: http://localhost:8000/api/swagger.json
+
+volumes:
+  frontend_build:

@@ -1,3 +1,15 @@
+# Use node container to build frontend app
+FROM node:10 as frontend-builder
+
+# Do everything relative to /usr/src/app which is where we install our
+# application.
+WORKDIR /usr/src/app
+
+# Install packages and build frontend
+ADD ./frontend/ ./
+RUN npm install && npm run build
+
+# Use python alpine image to run webapp proper
 FROM python:3.6-alpine
 
 # Ensure packages are up to date and install some useful utilities
@@ -16,6 +28,7 @@ RUN pip install --no-cache-dir -r requirements/base.txt && \
 
 # Copy the remaining files over
 ADD . .
+COPY --from=frontend-builder /usr/src/app/build/ ./frontend/build/
 
 # Default environment for image.  By default, we use the settings module bundled
 # with this repo. Change DJANGO_SETTINGS_MODULE to install a custom settings.

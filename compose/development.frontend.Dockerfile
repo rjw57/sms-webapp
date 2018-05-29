@@ -8,8 +8,8 @@ WORKDIR /usr/src/app
 ADD ./frontend/package*.json ./
 RUN npm install
 
-# The webapp source will be mounted here as a volume
-VOLUME /usr/src/app
+# The frontend webapp folder will be mounted here as a volume
+VOLUME /usr/src/app/
 
 # By default, use the development server to serve the application
 ENTRYPOINT ["npm"]

@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',  # use whitenoise even in development
     'django.contrib.staticfiles',
 
     'automationcommon',
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
 #: Installed middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -196,6 +198,14 @@ LOGGING = {
     },
 }
 
-#: Allow all origins to access API
+# Allow all origins to access API.
 CORS_URLS_REGEX = r'^/api/.*$'
 CORS_ORIGIN_ALLOW_ALL = True
+
+# Wee wsgi.py for how this is used.
+FRONTEND_APP_BUILD_DIR = os.environ.get(
+    'DJANGO_FRONTEND_APP_BUILD_DIR',
+    os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend', 'build'))
+)
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
