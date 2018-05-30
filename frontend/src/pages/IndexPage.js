@@ -5,14 +5,14 @@ import Typography from '@material-ui/core/Typography';
 
 import { withStyles } from '@material-ui/core/styles';
 
-import AppBar from '../components/AppBar';
-import MediaList from '../components/MediaList';
+import AppBar from '../AppBar';
+import MediaList from '../MediaList';
 
 import CollectionDefaultImage from './collection-default-image.jpg';
 
-import withRoot from '../withRoot';
+import withRoot from './withRoot';
 
-import withSearchResults, { SearchResultsProvider } from '../contexts/searchResults';
+import SearchResultsProvider, { withSearchResults } from '../providers/SearchResultsProvider';
 
 const MAX_COLLECTION_RESULTS = 3;
 

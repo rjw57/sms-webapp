@@ -31,4 +31,4 @@ const withProfile = Component => props => (
 );
 
 export { ProfileProvider, withProfile };
-export default withProfile;
+export default ProfileProvider;

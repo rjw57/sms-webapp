@@ -61,9 +61,12 @@ class SearchResultsProvider extends Component {
   }
 }
 
+SearchResultsProvider.propTypes = {
+};
+
 const withSearchResults = Component => props => (
   <Consumer>{ results => <Component {...results} {...props} /> }</Consumer>
 );
 
 export { SearchResultsProvider, withSearchResults };
-export default withSearchResults;
+export default SearchResultsProvider;

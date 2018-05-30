@@ -11,7 +11,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 import SearchForm from './SearchForm';
 
-import withProfile from '../contexts/profile';
+import { withProfile } from './providers/ProfileProvider';
 
 const ProfileButton = withProfile(({ profile, ...otherProps }) => {
   if(!profile) { return null; }

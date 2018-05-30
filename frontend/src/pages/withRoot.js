@@ -2,8 +2,8 @@ import React from 'react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-import { ProfileProvider } from './contexts/profile';
-import theme from './theme';
+import ProfileProvider from '../providers/ProfileProvider';
+import theme from '../../theme';
 
 /**
  * Wrap a component which is intended to be the top-level component for a page
