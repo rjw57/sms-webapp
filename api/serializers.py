@@ -27,7 +27,7 @@ class MediaListSerializer(serializers.Serializer):
     Serialise a JWPlatform video list response.
 
     """
-    media = MediaSerializer(many=True, source='videos')
+    results = MediaSerializer(many=True, source='videos')
     limit = serializers.IntegerField()
     offset = serializers.IntegerField()
     total = serializers.IntegerField()
@@ -59,7 +59,7 @@ class CollectionListSerializer(serializers.Serializer):
     Serialise a JWPlatform video list response.
 
     """
-    collections = CollectionSerializer(many=True, source='channels')
+    results = CollectionSerializer(many=True, source='channels')
     limit = serializers.IntegerField()
     offset = serializers.IntegerField()
     total = serializers.IntegerField()
