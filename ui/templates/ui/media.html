@@ -31,8 +31,10 @@
   catch(e){window.attachEvent("onload", $buo_f)}
   </script>
 
+  {% autoescape off %}
   <script>
-      window.mediaItem = JSON.parse('{{ media_item_json | escapejs }}');
+    window.mediaItem = {{ json }};
   </script>
+  {% endautoescape %}
   <script type="text/javascript" src="/static/js/bundle.js"></script></body>
 </html>
