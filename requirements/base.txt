@@ -6,7 +6,7 @@ psycopg2-binary
 # corresponding pypi release. Recall that git branched may be explicitly given
 # in the VCS URL.
 git+https://github.com/uisautomation/django-automationcommon.git@master#egg=django-automationcommon
-git+https://github.com/uisautomation/django-automationoauth.git@master#egg=django-automationoauth
+git+https://github.com/rjw57/django-automationoauth.git@decouple-lookup#egg=django-automationoauth
 django-ucamwebauth>=1.4.5
 djangorestframework
 django-cors-headers
