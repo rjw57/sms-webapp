@@ -11,16 +11,29 @@ services:
 
   # Lookup proxy service
   lookupproxy:
-    build:
-      context: .
-      dockerfile: ./lookupproxy.Dockerfile
+    image: uisautomation/lookupproxy
+    entrypoint: ["/tmp/wait-for-it.sh", "lookupproxy-db:5432", "--", "./manage.py", "runserver", "0.0.0.0:8080"]
     expose:
       - "8080"
     ports:
       - "8080:8080"
     depends_on:
       - "lookupproxy-db"
+      - "lookupproxy-migration"
       - "hydra"
+    volumes:
+      - ./wait-for-it.sh:/tmp/wait-for-it.sh
+      - ./lookupproxysettings.py:/usr/src/app/lookupproxysettings.py
+    env_file:
+      - lookupproxy.env
+  lookupproxy-migration:
+    image: uisautomation/lookupproxy
+    depends_on:
+      - "lookupproxy-db"
+    volumes:
+      - ./wait-for-it.sh:/tmp/wait-for-it.sh
+      - ./lookupproxysettings.py:/usr/src/app/lookupproxysettings.py
+    entrypoint: ["/tmp/wait-for-it.sh", "lookupproxy-db:5432", "--", "./manage.py", "migrate"]
     env_file:
       - lookupproxy.env
   lookupproxy-db:

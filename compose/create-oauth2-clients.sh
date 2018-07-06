@@ -34,6 +34,13 @@ hydra clients create \
     --response-types token \
     --allowed-scopes lookup:anonymous
 
+# Create client which can request scopes to introspect tokens
+hydra clients create \
+    --id introspectclient --secret introspectsecret \
+    --grant-types client_credentials \
+    --response-types token \
+    --allowed-scopes hydra.introspect
+
 # We need to create a Hydra policy allowing the smswebapp to introspect tokens.
 # Delete a policy if it is already in place and re-create it
 hydra policies delete introspect-policy \
