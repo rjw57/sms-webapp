@@ -28,6 +28,7 @@ urlpatterns = [
     path('collections/', views.CollectionListView.as_view(), name='collections'),
     path('media/', views.MediaListView.as_view(), name='media_list'),
     path('media/<pk>', views.MediaView.as_view(), name='media_item'),
+    path('media/<pk>/upload', views.MediaUploadView.as_view(), name='media_upload'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
     re_path(
         r'^swagger(?P<format>\.json|\.yaml)$',
