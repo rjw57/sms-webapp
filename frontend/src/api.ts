@@ -65,6 +65,17 @@ export interface IMediaResource {
   contentUrl?: string;
 };
 
+export interface IMediaCreateResource {
+  name: string;
+  description?: string;
+};
+
+/** A media upload resource. */
+export interface IMediaUploadResource {
+  url: string;
+  expires_at: string;
+};
+
 /** A collection resource. */
 export interface ICollectionResource {
   id: string;
@@ -164,6 +175,29 @@ export const mediaList = (
   { search, ordering }: IMediaQuery = {}
 ): Promise<IMediaListResponse | IError> => {
   return apiFetch(API_ENDPOINTS.mediaList + objectToQueryPart({ search, ordering }));
+};
+
+/** Create a new media resource. */
+export const mediaCreate = (body: IMediaCreateResource) : Promise<IMediaResource | IError> => {
+  return apiFetch(API_ENDPOINTS.mediaList, {
+    body: JSON.stringify(body),
+    method: 'POST',
+  });
+};
+
+/** Patch an existing media resource. */
+export const mediaPatch = (item: IMediaResource) : Promise<IMediaResource | IError> => {
+  // TODO: decide if we want to use the URL in @id rather than key here,
+  return apiFetch(API_ENDPOINTS.mediaList + item.key, {
+    body: JSON.stringify(item),
+    method: 'PATCH',
+  });
+};
+
+/** Create a new media resource. */
+export const mediaUploadGet = (item: IMediaResource) : Promise<IMediaUploadResource | IError> => {
+  // TODO: decide if we want to use the URL in @id rather than key here,
+  return apiFetch(API_ENDPOINTS.mediaList + item.key + '/upload');
 };
 
 /** List collection resources. */
