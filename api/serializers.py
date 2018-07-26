@@ -54,7 +54,8 @@ class MediaSerializer(serializers.HyperlinkedModelSerializer):
 
     name = serializers.CharField(source='title', help_text='Title of media')
 
-    description = serializers.CharField(help_text='Description of media', required=False)
+    description = serializers.CharField(
+        help_text='Description of media', required=False, allow_blank=True)
 
     duration = serializers.SerializerMethodField(
         help_text='Duration of the media in ISO 8601 format', read_only=True)
