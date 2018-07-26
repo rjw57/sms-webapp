@@ -48,7 +48,7 @@ const MediaPage = ({ mediaItem, classes }) => (
         <Grid item xs={6} style={{textAlign: 'right'}}>
           <Typography variant="subheading">
             {
-              mediaItem.legacy.statisticsUrl
+              mediaItem.legacy && mediaItem.legacy.statisticsUrl
               ?
               <a className={ classes.link } href={mediaItem.legacy.statisticsUrl}>
                 Statistics
