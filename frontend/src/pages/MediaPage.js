@@ -8,16 +8,33 @@ import { withStyles } from '@material-ui/core/styles';
 import { BASE_SMS_URL } from '../api';
 import Page from '../components/Page';
 import RenderedMarkdown from '../components/RenderedMarkdown';
+import MediaItemProvider, { withMediaItem } from '../providers/MediaItemProvider';
 
 /**
  * The media item page
  */
-const MediaPage = ({ mediaItem, classes }) => (
+const MediaPage = ({ match: { params: { pk } }, classes }) => (
   <Page>
+    <MediaItemProvider id={ pk }>
+      <ConnectedMediaPageContents />
+    </MediaItemProvider>
+  </Page>
+);
+
+MediaPage.propTypes = {
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      pk: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+};
+
+const MediaPageContents = ({ item, classes }) => (
+  <div>
     <section className={ classes.playerSection }>
       <div className={ classes.playerWrapper }>
         <iframe
-          src={ mediaItem.embedUrl }
+          src={ (item && item.links) ? item.links.embedUrl : '' }
           className={ classes.player }
           frameBorder="0"
           allowFullScreen>
@@ -27,17 +44,17 @@ const MediaPage = ({ mediaItem, classes }) => (
     <section className={ classes.mediaDetails }>
       <Grid container spacing={16}>
         <Grid item xs={12}>
-          <Typography variant="headline" component="div">{ mediaItem.name }</Typography>
+          <Typography variant="headline" component="div">{ item ? item.title : '' }</Typography>
         </Grid>
         <Grid item xs={12}>
-          <RenderedMarkdown source={ mediaItem.description }/>
+          <RenderedMarkdown source={ item ? item.description : '' }/>
         </Grid>
         <Grid item xs={6}>
           <Typography variant="subheading">
             {
-              mediaItem.contentUrl
+              item && item.contentUrl
               ?
-              <a target='_blank' className={ classes.link } href={mediaItem.contentUrl} download>
+              <a target='_blank' className={ classes.link } href={ item.contentUrl } download>
                 Download media
               </a>
               :
@@ -48,9 +65,9 @@ const MediaPage = ({ mediaItem, classes }) => (
         <Grid item xs={6} style={{textAlign: 'right'}}>
           <Typography variant="subheading">
             {
-              mediaItem.legacy && mediaItem.legacy.statisticsUrl
+              item && item.links && item.links.legacyStatisticsUrl
               ?
-              <a className={ classes.link } href={mediaItem.legacy.statisticsUrl}>
+              <a className={ classes.link } href={ item.links.legacyStatisticsUrl }>
                 Statistics
               </a>
               :
@@ -60,25 +77,12 @@ const MediaPage = ({ mediaItem, classes }) => (
         </Grid>
       </Grid>
     </section>
-  </Page>
+  </div>
 );
 
-MediaPage.propTypes = {
+MediaPageContents.propTypes = {
   classes: PropTypes.object.isRequired,
-};
-
-/**
- * A higher-order component wrapper which passes the media item to its child. At the moment the
- * media item is the JSON-parsed contents of an element with id "mediaItem".
- */
-const withMediaItem = WrappedComponent => props => {
-  let mediaItem = null;
-  const mediaItemElement = document.getElementById('mediaItem');
-  if(mediaItemElement) {
-    mediaItem = JSON.parse(mediaItemElement.textContent);
-  }
-
-  return (<WrappedComponent mediaItem={mediaItem} {...props} />);
+  item: PropTypes.object,
 };
 
 /* tslint:disable object-literal-sort-keys */
@@ -123,5 +127,7 @@ var styles = theme => ({
   },
 });
 /* tslint:enable */
+
+const ConnectedMediaPageContents = withMediaItem(withStyles(styles)(MediaPageContents));
 
 export default withMediaItem(withStyles(styles)(MediaPage));
