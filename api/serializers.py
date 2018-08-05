@@ -171,6 +171,7 @@ class ProfileSerializer(serializers.Serializer):
 
     """
     is_anonymous = serializers.BooleanField(source='user.is_anonymous')
+    is_staff = serializers.BooleanField(source='user.is_staff')
     username = serializers.CharField(source='user.username')
     urls = serializers.DictField()
 

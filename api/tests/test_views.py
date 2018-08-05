@@ -62,6 +62,16 @@ class ProfileViewTestCase(ViewTestCase):
         self.assertFalse(response.data['is_anonymous'])
         self.assertEqual(response.data['username'], self.user.username)
 
+    def test_is_staff(self):
+        """The user's "is_staff" status should be reflected in the response."""
+        force_authenticate(self.get_request, user=self.user)
+        response = self.view(self.get_request)
+        self.assertFalse(response.data['is_staff'])
+        self.user.is_staff = True
+        self.user.save()
+        response = self.view(self.get_request)
+        self.assertTrue(response.data['is_staff'])
+
     def test_urls(self):
         """The profile should include a login URL."""
         response = self.view(self.get_request)
