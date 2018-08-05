@@ -4,8 +4,10 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import UploadIcon from '@material-ui/icons/CloudUpload';
+import AdminIcon from '@material-ui/icons/SupervisorAccount';
 
 import withRoot from "../pages/withRoot";
+import { withProfile } from "../providers/ProfileProvider";
 import AppBar from "./AppBar";
 import MotdBanner from "./MotdBanner";
 import ProfileButtonContainer from "../containers/ProfileButtonContainer";
@@ -19,6 +21,7 @@ const Page = (
 ) => (
       <div className={ classes.page }>
         <AppBar position="fixed" defaultSearch={defaultSearch}>
+          <AdminButton />
           <IconButton color="inherit" component="a" href="/upload">
             <UploadIcon />
           </IconButton>
@@ -39,6 +42,16 @@ Page.propTypes = {
   /** Default search text to populate the search form with. */
   defaultSearch: PropTypes.string,
 };
+
+const AdminButton = withProfile(({ profile }) => (
+  profile && profile.is_staff
+  ?
+  <IconButton color="inherit" component="a" href="/admin">
+    <AdminIcon />
+  </IconButton>
+  :
+  null
+));
 
 const styles = theme => ({
   page: {
