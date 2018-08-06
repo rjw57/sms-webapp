@@ -437,6 +437,21 @@ class ChannelTest(TestCase):
         permission_id_2 = models.Channel.objects.get(id=channel.id).edit_permission.id
         self.assertEquals(permission_id_1, permission_id_2)
 
+    def test_view_permission_created(self):
+        """A new Channel has a view permission created on save()."""
+        channel = models.Channel.objects.create(title='test channel')
+        self.assertIsNotNone(models.Channel.objects.get(id=channel.id).view_permission)
+
+    def test_view_permission_not_re_created(self):
+        """The view_permission is not changed if a Channel is updated."""
+        channel = models.Channel.objects.create(title='test channel')
+        permission_id_1 = models.Channel.objects.get(id=channel.id).view_permission.id
+        channel = models.Channel.objects.get(id=channel.id)
+        channel.title = 'changed'
+        channel.save()
+        permission_id_2 = models.Channel.objects.get(id=channel.id).view_permission.id
+        self.assertEquals(permission_id_1, permission_id_2)
+
     def assert_user_cannot_edit(self, user, channel_or_id):
         if isinstance(channel_or_id, str):
             channel_or_id = models.Channel.objects_including_deleted.get(id=channel_or_id)

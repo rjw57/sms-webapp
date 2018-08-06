@@ -336,6 +336,12 @@ class Permission(models.Model):
         null=True
     )
 
+    #: Channel whose view permission is this object
+    allows_view_channel = models.OneToOneField(
+        'Channel', on_delete=models.CASCADE, related_name='view_permission', editable=False,
+        null=True
+    )
+
     #: Channel whose edit permission is this object
     allows_edit_channel = models.OneToOneField(
         'Channel', on_delete=models.CASCADE, related_name='edit_permission', editable=False,
@@ -535,6 +541,8 @@ def _channel_post_save_handler(*args, sender, instance, created, raw, **kwargs):
     if raw or not created:
         return
 
+    if not hasattr(instance, 'view_permission'):
+        Permission.objects.create(allows_view_channel=instance)
     if not hasattr(instance, 'edit_permission'):
         Permission.objects.create(allows_edit_channel=instance)
 

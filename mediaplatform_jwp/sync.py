@@ -170,6 +170,9 @@ def update_related_models_from_cache(update_all_videos=False, update_all_channel
     # Since the bulk_create() call does not call any signal handlers, we need to manually create
     # all of the permissions for the new channels.
     mpmodels.Permission.objects.bulk_create([
+        mpmodels.Permission(allows_view_channel=channel) for _, channel in jwp_keys_and_channels
+    ])
+    mpmodels.Permission.objects.bulk_create([
         mpmodels.Permission(allows_edit_channel=channel) for _, channel in jwp_keys_and_channels
     ])
 
