@@ -135,7 +135,7 @@ def update_related_models_from_cache(update_all_videos=False, update_all_channel
     ])
     mpmodels.Permission.objects.bulk_create([
         mpmodels.Permission(allows_edit_item=item) for _, item in jwp_keys_and_items
-    ])
+    ])  # TODO: remove once edit permissions are on channel
 
     # Add the corresponding media item link to the JWP videos.
     for key, item in jwp_keys_and_items:
@@ -188,10 +188,10 @@ def update_related_models_from_cache(update_all_videos=False, update_all_channel
     # reset it anyway.
     updated_media_items = (
         mpmodels.MediaItem.objects.all()
-        .select_related('view_permission', 'edit_permission')
+        .select_related('view_permission')
         # updated_at is included because, without it, the field does not get updated on save() for
         # some reason
-        .only('view_permission', 'edit_permission', 'jwp', 'sms', 'updated_at')
+        .only('view_permission', 'jwp', 'sms', 'updated_at')
         .annotate(data=models.Subquery(
             smsjwpmodels.CachedResource.videos
             .filter(key=models.OuterRef('jwp__key'))
@@ -268,8 +268,7 @@ def update_related_models_from_cache(update_all_videos=False, update_all_channel
             _set_permission_from_acl(item.view_permission, video.acl)
             item.view_permission.save()
 
-            # Updated edit permission. SMS sync-ed media items have their edit permissions
-            # controlled by the collection.
+            # Reset edit permission (TODO: remove this when we move edit permissions to channel)
             item.edit_permission.reset()
             item.edit_permission.save()
 
@@ -346,10 +345,8 @@ def update_related_models_from_cache(update_all_videos=False, update_all_channel
         channel.title = _default_if_none(channel_data.get('title'), '')
         channel.description = _default_if_none(channel_data.get('description'), '')
 
-        # TODO: we ignore the ACL at the moment since it is unclear what it means re: individual
-        # media item viewing. I.e. is the view permission of a media item the logical AND of the
-        # channel and media item? Before we make too many changes to the model, this should be
-        # discussed.
+        # TODO: We should use the ACL here on the *playlist* which gets created with the channel as
+        # a view ACL. We do not have playlists yet, so do nothing.
 
         # Update edit permission
         channel.edit_permission.reset()
