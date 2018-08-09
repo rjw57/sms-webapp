@@ -187,7 +187,6 @@ class MediaUploadSerializer(serializers.Serializer):
 class MediaItemLinksSerializer(serializers.Serializer):
     legacyStatisticsUrl = serializers.SerializerMethodField()
     embedUrl = serializers.SerializerMethodField()
-    sources = serializers.SerializerMethodField(source='*')
 
     def get_legacyStatisticsUrl(self, obj):
         if not hasattr(obj, 'sms'):
@@ -203,14 +202,6 @@ class MediaItemLinksSerializer(serializers.Serializer):
             settings.JWPLATFORM_CONTENT_BASE_URL
         )
 
-    def get_sources(self, obj):
-        if not obj.downloadable or not hasattr(obj, 'jwp'):
-            return None
-
-        video = jwplatform.DeliveryVideo.from_key(obj.jwp.key)
-
-        return SourceSerializer(video.get('sources'), many=True).data
-
 
 class MediaItemDetailSerializer(MediaItemSerializer):
     """
@@ -218,11 +209,21 @@ class MediaItemDetailSerializer(MediaItemSerializer):
 
     """
     class Meta(MediaItemSerializer.Meta):
-        fields = MediaItemSerializer.Meta.fields + ('links', 'channel')
+        fields = MediaItemSerializer.Meta.fields + ('links', 'channel', 'sources')
 
     links = MediaItemLinksSerializer(source='*', read_only=True)
 
     channel = ChannelSerializer(read_only=True)
+
+    sources = serializers.SerializerMethodField(source='*')
+
+    def get_sources(self, obj):
+        if not obj.downloadable or not hasattr(obj, 'jwp'):
+            return []
+
+        video = jwplatform.DeliveryVideo.from_key(obj.jwp.key)
+
+        return SourceSerializer(video.get('sources'), many=True).data
 
 
 class MediaAnalyticsItemSerializer(serializers.Serializer):
