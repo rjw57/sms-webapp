@@ -20,7 +20,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 import MediaDropzone from '../components/MediaDropzone';
 import ItemMetadataForm from '../components/ItemMetadataForm';
-import { mediaCreate, mediaPatch, mediaUploadGet, profileGet } from '../api';
+import { API_TOKEN_HEADERS, mediaCreate, mediaPatch, mediaUploadGet, profileGet } from '../api';
 
 /**
  * A container component which takes a media item resource and upload endpoint via its props and
@@ -237,6 +237,7 @@ class UploadForm extends Component {
 
     // Actually start the upload.
     req.open('post', url)
+    Object.entries(API_TOKEN_HEADERS).map(([k, v]) => req.setRequestHeader(k, v));
     req.send(formData);
 
     // Record that we started an upload
