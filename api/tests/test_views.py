@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 from django.urls import reverse
+from django.utils.timezone import now
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 import smsjwplatform.jwplatform as api
@@ -337,6 +338,8 @@ class MediaItemViewTestCase(ViewTestCase):
 class UploadEndpointTestCase(ViewTestCase):
     fixtures = ['api/tests/fixtures/mediaitems.yaml']
 
+    MOCK_ENDPOINT = 'http://test-case-mock.invalid/upload'
+
     def setUp(self):
         super().setUp()
         self.view = views.MediaItemUploadView().as_view()
@@ -348,20 +351,32 @@ class UploadEndpointTestCase(ViewTestCase):
         self.item.channel.edit_permission.reset()
         self.item.channel.edit_permission.save()
 
+        # Assert that an upload endpoint already exists with an expiry date in the future
+        self.item.upload_endpoint.expires_at = now() + datetime.timedelta(days=5)
+        self.item.upload_endpoint.save()
+
+    def test_anonymous_user_forbidden(self):
+        """The anonymous user gets permission denied for unsafe operations even for
+        non-existent items."""
+        response = self.post_for_item()
+        self.assertEqual(response.status_code, 403)
+
+        pk = 'does-not-exist'
+        self.assertFalse(mpmodels.MediaItem.objects.filter(id=pk).exists())
+        response = self.post_for_item(pk=pk)
+        self.assertEqual(response.status_code, 403)
+
     def test_needs_view_permission(self):
         """Upload endpoint should 404 if user doesn't have view permission."""
-        response = self.get_for_item()
-        self.assertEqual(response.status_code, 404)
-
         self.client.force_login(self.user)
-        response = self.get_for_item()
+        response = self.post_for_item()
         self.assertEqual(response.status_code, 404)
 
     def test_needs_edit_permission(self):
         """If user has view but not edit permission, endpoint should deny permission."""
         self.add_view_permission()
         self.client.force_login(self.user)
-        response = self.get_for_item()
+        response = self.post_for_item()
         self.assertEqual(response.status_code, 403)
 
     def test_allows_view_and_edit_permission(self):
@@ -369,34 +384,51 @@ class UploadEndpointTestCase(ViewTestCase):
         self.client.force_login(self.user)
         self.add_view_permission()
         self.add_edit_permission()
-        response = self.get_for_item()
-        self.assertEqual(response.status_code, 200)
-        body = response.json()
-        self.assertEqual(body['url'], self.item.upload_endpoint.url)
-        self.assertEqual(
-            dateparser.parse(body['expires_at']),
-            self.item.upload_endpoint.expires_at
-        )
+        response = self.post_for_item()
+        self.assertRedirects(
+            response, self.item.upload_endpoint.url, fetch_redirect_response=False)
 
-    def test_create_upload_endpoint(self):
-        """PUT-ing endpoint creates a new upload endpoint."""
+        # Endpoint was deleted
+        self.assertFalse(mpmodels.UploadEndpoint.objects.filter(item=self.item).exists())
+
+    def test_recreate_if_expired(self):
+        """If the upload endpoint has expired, a new one is created."""
         self.client.force_login(self.user)
         self.add_view_permission()
         self.add_edit_permission()
+        self.item.upload_endpoint.expires_at = now() - datetime.timedelta(seconds=1)
+        self.item.upload_endpoint.save()
 
         with mock.patch('mediaplatform_jwp.management.create_upload_endpoint') as mock_create:
-            response = self.put_for_item()
+            mock_create.side_effect = self.create_mock_upload_endpoint
+            response = self.post_for_item()
 
-        self.assertEqual(response.status_code, 200)
         mock_create.assert_called_once()
-        item = mock_create.call_args[0][0]
-        self.assertEqual(item.id, self.item.id)
+        self.assertRedirects(response, self.MOCK_ENDPOINT, fetch_redirect_response=False)
 
-    def get_for_item(self, **kwargs):
-        return self.client.get(reverse('api:media_upload', kwargs={'pk': self.item.pk}), **kwargs)
+        # Endpoint was deleted
+        self.assertFalse(mpmodels.UploadEndpoint.objects.filter(item=self.item).exists())
 
-    def put_for_item(self, **kwargs):
-        return self.client.put(reverse('api:media_upload', kwargs={'pk': self.item.pk}), **kwargs)
+    def test_recreate_if_delete(self):
+        """If the upload endpoint has been deleted, a new one is created."""
+        self.client.force_login(self.user)
+        self.add_view_permission()
+        self.add_edit_permission()
+        self.item.upload_endpoint.delete()
+
+        with mock.patch('mediaplatform_jwp.management.create_upload_endpoint') as mock_create:
+            mock_create.side_effect = self.create_mock_upload_endpoint
+            response = self.post_for_item()
+
+        mock_create.assert_called_once()
+        self.assertRedirects(response, self.MOCK_ENDPOINT, fetch_redirect_response=False)
+
+        # Endpoint was deleted
+        self.assertFalse(mpmodels.UploadEndpoint.objects.filter(item=self.item).exists())
+
+    def post_for_item(self, pk=None, **kwargs):
+        pk = pk if pk is not None else self.item.pk
+        return self.client.post(reverse('api:media_upload', kwargs={'pk': pk}), **kwargs)
 
     def add_view_permission(self):
         self.item.view_permission.crsids.append(self.user.username)
@@ -405,6 +437,13 @@ class UploadEndpointTestCase(ViewTestCase):
     def add_edit_permission(self):
         self.item.channel.edit_permission.crsids.append(self.user.username)
         self.item.channel.edit_permission.save()
+
+    def create_mock_upload_endpoint(self, item, *args, **kwargs):
+        """Create a fake upload endpoint for the item which expires in the future. Does nto attempt
+        to delete any existing upload endpoints."""
+        return mpmodels.UploadEndpoint.objects.create(
+            url=self.MOCK_ENDPOINT, expires_at=now() + datetime.timedelta(days=1),
+            item=item)
 
 
 class MediaItemAnalyticsViewCase(ViewTestCase):

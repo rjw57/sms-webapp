@@ -126,6 +126,7 @@
   pk: upload1
   fields:
     item: populated
+    url: http://upload.invalid/
     expires_at: 2010-09-15 14:40:45
 
 - model: legacysms.MediaItem

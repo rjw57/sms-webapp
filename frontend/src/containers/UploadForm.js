@@ -193,7 +193,8 @@ class UploadForm extends Component {
 
   /** Called when a new media item has been created to receive the upload. */
   setMediaItem(item) {
-    mediaUploadGet(item).then(({ url }) => this.setUploadUrl(url));
+    if(!item || !item.uploadUrl) { return; }
+    this.setUploadUrl(item.uploadUrl);
     this.setState({ item, draftItem: { ...item, ...this.state.draftItem } });
   }
 
@@ -236,6 +237,7 @@ class UploadForm extends Component {
     };
 
     // Actually start the upload.
+    req.withCredentials = true; // make sure CSRF token is in request
     req.open('post', url)
     Object.entries(API_TOKEN_HEADERS).map(([k, v]) => req.setRequestHeader(k, v));
     req.send(formData);

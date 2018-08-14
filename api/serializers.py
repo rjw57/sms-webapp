@@ -88,11 +88,12 @@ class MediaItemSerializer(serializers.HyperlinkedModelSerializer):
         fields = (
             'url', 'id', 'title', 'description', 'duration', 'type', 'publishedAt',
             'downloadable', 'language', 'copyright', 'tags', 'createdAt',
-            'updatedAt', 'posterImageUrl', 'channelId',
+            'updatedAt', 'posterImageUrl', 'channelId', 'uploadUrl'
         )
 
         read_only_fields = (
-            'url', 'id', 'duration', 'type', 'createdAt', 'updatedAt', 'posterImageUrl'
+            'url', 'id', 'duration', 'type', 'createdAt', 'updatedAt', 'posterImageUrl',
+            'uploadUrl'
         )
         extra_kwargs = {
             'createdAt': {'source': 'created_at'},
@@ -108,6 +109,9 @@ class MediaItemSerializer(serializers.HyperlinkedModelSerializer):
     channelId = MediaItemRelatedChannelIdField(
         source='channel', required=True, help_text='Unique id of owning channel resource',
         write_only=True)
+
+    uploadUrl = serializers.SerializerMethodField(
+        help_text='POST video files to this endpoint to upload media', read_only=True)
 
     def create(self, validated_data):
         """
@@ -144,6 +148,9 @@ class MediaItemSerializer(serializers.HyperlinkedModelSerializer):
         if not hasattr(obj, 'jwp'):
             return None
         return jwplatform.Video({'key': obj.jwp.key}).get_poster_url(width=640)
+
+    def get_uploadUrl(self, obj):
+        return reverse('api:media_upload', kwargs={'pk': obj.id})
 
 
 # Detail serialisers

@@ -5,10 +5,13 @@ Views implementing the API endpoints.
 import logging
 
 from django.db import models
+from django.shortcuts import redirect
+from django.utils.timezone import now
 from django_filters import rest_framework as df_filters
 from rest_framework import generics, pagination, filters
 
 import mediaplatform.models as mpmodels
+from mediaplatform_jwp import management
 
 from . import permissions
 from . import serializers
@@ -131,11 +134,10 @@ class MediaItemView(MediaItemMixin, generics.RetrieveUpdateAPIView):
     serializer_class = serializers.MediaItemDetailSerializer
 
 
-class MediaItemUploadView(MediaItemMixin, generics.RetrieveUpdateAPIView):
+class MediaItemUploadView(MediaItemMixin, generics.CreateAPIView):
     """
-    Endpoint for retrieving an upload URL for a media item. Requires that the user have the edit
-    permission for the media item. Should the upload URL be expired or otherwise unsuitable, a HTTP
-    POST/PUT to this endpoint refreshes the URL.
+    Endpoint for uploading video to a media item. Requires that the user have the edit
+    permission for the media item.
 
     """
     # To access the upload API, the user must always have the edit permission.
@@ -147,6 +149,25 @@ class MediaItemUploadView(MediaItemMixin, generics.RetrieveUpdateAPIView):
     # Make sure that the related upload_endpoint is fetched by the queryset
     def get_queryset(self):
         return super().get_queryset().select_related('upload_endpoint')
+
+    def create(self, request, *args, **kwargs):
+        # Get the media item related to this upload endpoint. Checks any associated permissions
+        item = self.get_object()
+
+        if not hasattr(item, 'upload_endpoint') or item.upload_endpoint.expires_at < now():
+            # Delete any existing endpoints
+            mpmodels.UploadEndpoint.objects.filter(item=item).delete()
+
+            # TODO: abstract the creation of UploadEndpoint objects to be backend neutral
+            upload_endpoint = management.create_upload_endpoint(item)
+        else:
+            upload_endpoint = item.upload_endpoint
+
+        # Retrieve the endpoint's URL. Since upload endpoint URLs are a one-time thing, delete it
+        # from the DB afterwards.
+        url = upload_endpoint.url
+        upload_endpoint.delete()
+        return redirect(url)
 
 
 class MediaItemAnalyticsView(MediaItemMixin, generics.RetrieveAPIView):
