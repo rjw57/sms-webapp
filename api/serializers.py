@@ -317,6 +317,47 @@ class MediaItemAnalyticsListSerializer(serializers.Serializer):
         return MediaItemAnalyticsSerializer(results, many=True).data
 
 
+class ChannelSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    An individual channel.
+
+    """
+    class Meta:
+        model = mpmodels.Channel
+        fields = (
+            'url', 'id', 'title', 'description', 'owningLookupInst', 'createdAt', 'updatedAt',
+        )
+
+        read_only_fields = (
+            'url', 'id', 'createdAt', 'updatedAt',
+        )
+        extra_kwargs = {
+            'createdAt': {'source': 'created_at'},
+            'updatedAt': {'source': 'updated_at'},
+            'owningLookupInst': {'source': 'owning_lookup_inst'},
+            'url': {'view_name': 'api:channel'},
+            'title': {'allow_blank': False},
+        }
+
+    def create(self, validated_data):
+        """
+        Override behaviour when creating a new object using this serializer. If the current request
+        is being passed in the context, give the request user edit and view permissions on the
+        item.
+
+        """
+        request = None
+        if self.context is not None and 'request' in self.context:
+            request = self.context['request']
+
+        if request is not None and not request.user.is_anonymous:
+            obj = mpmodels.Channel.objects.create_for_user(request.user, **validated_data)
+        else:
+            obj = mpmodels.Channel.objects.create(**validated_data)
+
+        return obj
+
+
 class ChannelDetailSerializer(ChannelSerializer):
     """
     An individual channel including related resources.

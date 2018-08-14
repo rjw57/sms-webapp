@@ -21,7 +21,7 @@ const ProfileButton = ({ profile, ...otherProps }) => {
   if(profile.isAnonymous) {
     return (
       <Button component='a' href="/accounts/login" {...otherProps}>
-        Sign in
+        Sign&nbsp;in
       </Button>
     );
   }
