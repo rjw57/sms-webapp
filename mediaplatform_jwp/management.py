@@ -81,7 +81,8 @@ def _perform_item_update(item):
 def create_upload_endpoint(item):
     """
     Create an upload endpoint for a media item. Raises ValueError if the item does not have a
-    corresponding JWP video
+    corresponding JWP video. Returns the new :py:class:`mediaplatform.models.UploadEndpoint`
+    instance.
 
     """
     if not hasattr(item, 'jwp'):
@@ -93,7 +94,7 @@ def create_upload_endpoint(item):
     response = jwp_client.videos.update(
         http_method='POST', video_key=item.jwp.key, update_file=True)
 
-    upload.record_link_response(response['link'], item)
+    return upload.record_link_response(response['link'], item)
 
 
 def _permission_to_acl(permission):

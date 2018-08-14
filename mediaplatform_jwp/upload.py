@@ -24,6 +24,8 @@ def record_link_response(link_data, item):
     The default JWP upload link expiry is 7 days from creation. We assume the link has just been
     created and set an expiry of "now" plus :py:data:`~.UPLOAD_URL_LIFETIME`.
 
+    Returns the new upload endpoint.
+
     """
     # If the JWP_FORCE_HTTPS_UPLOAD setting is True and JWP has given us a HTTP link, force it to
     # be HTTPS.
@@ -41,6 +43,6 @@ def record_link_response(link_data, item):
     # Parse response and create an upload endpoint. We mandate in the database that there can be
     # only one upload endpoint for a given MediaItem.
     mpmodels.UploadEndpoint.objects.filter(item=item).delete()
-    mpmodels.UploadEndpoint.objects.create(
+    return mpmodels.UploadEndpoint.objects.create(
         url=upload_url, item=item, expires_at=timezone.now() + UPLOAD_URL_LIFETIME
     )
