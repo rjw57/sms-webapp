@@ -18,10 +18,24 @@ const CSRF_ELEMENT =
   (document.getElementsByName('csrfmiddlewaretoken')[0] as HTMLInputElement);
 const CSRF_TOKEN = (typeof(CSRF_ELEMENT) !== 'undefined') ? CSRF_ELEMENT.value : '';
 
+// Get user authorisation token from the page from the element with id "authToken". If no such
+// element is present, the token is empty.
+const AUTH_ELEMENT =
+  (document.getElementById('authToken') as HTMLInputElement);
+const AUTH_TOKEN = (typeof(AUTH_ELEMENT) !== 'undefined') ? AUTH_ELEMENT.text : '';
+
+// Headers to send with a request to perform token authentication
+export const API_TOKEN_HEADERS = { };
+if(AUTH_TOKEN !== '') {
+  API_TOKEN_HEADERS['Authorization'] = 'Token ' + AUTH_TOKEN;
+};
+
 // Headers to send with fetch request which authorises us to Django.
 const API_HEADERS = {
   'Content-Type': 'application/json',
   'X-CSRFToken': CSRF_TOKEN,
+
+  ...API_TOKEN_HEADERS,
 };
 
 // Iterate over all resources which have been embedded in the page and build a map keyed by

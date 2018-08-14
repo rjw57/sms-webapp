@@ -1,3 +1,4 @@
+{% load user_token %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -54,6 +55,8 @@
       try {document.addEventListener("DOMContentLoaded", $buo_f,false)}
       catch(e){window.attachEvent("onload", $buo_f)}
     </script>
+    {# Include user token #}
+    <script id="authToken" type="x-app/token">{% user_token %}</script>
     {% block extrabody %}{% endblock %}
   </body>
 </html>
