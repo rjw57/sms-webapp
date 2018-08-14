@@ -12,7 +12,7 @@ def user_token(context):
     the user is anonymous.
 
     """
-    user = context['request']['user']
+    user = context['request'].user
     if user.is_anonymous:
         return ''
-    return Token.objects.get_or_create(user=user).key
+    return Token.objects.get_or_create(user=user)[0].key
