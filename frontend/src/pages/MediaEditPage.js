@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
 
-import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 
 import Page from '../containers/Page';
 import ItemMetadataForm from "../components/ItemMetadataForm";
+import MediaItemPreview from "../components/MediaItemPreview";
 import {mediaGet, mediaPatch} from "../api";
 import { setMessageForNextPageLoad } from "../containers/Snackbar";
 
@@ -52,8 +55,8 @@ class MediaEditPage extends Component {
     return (
       <Page>
         <section className={classes.section}>
-          <Grid container justify='center'>
-            <Grid item xs={12} sm={10} md={8} lg={6}>
+          <Grid container justify='center' spacing={32}>
+            <Grid item xs={12} sm={6} lg={4}>
               <ItemMetadataForm
                 item={item}
                 errors={errors}
@@ -67,6 +70,10 @@ class MediaEditPage extends Component {
                   Save
                 </Button>
               </div>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Typography variant='subheading' gutterBottom>Preview</Typography>
+              <MediaItemPreview component={ Paper } className={ classes.preview } item={ item } />
             </Grid>
           </Grid>
         </section>
@@ -82,6 +89,9 @@ const styles = theme => ({
     },
     marginTop: theme.spacing.unit,
     textAlign: 'right',
+  },
+  preview: {
+    padding: theme.spacing.unit * 3,
   },
   section: {
     marginTop: theme.spacing.unit,

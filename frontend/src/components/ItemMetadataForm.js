@@ -33,7 +33,7 @@ const ItemMetadataForm = ({
     margin='normal'
     multiline
     onChange={ event => onChange && onChange({ description: event.target.value }) }
-    rows={ 4 }
+    rows={ 8 }
     value={ description }
   />
 </div>);
