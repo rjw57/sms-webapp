@@ -358,21 +358,18 @@ def update_related_models_from_cache(update_all_videos=False):
 
         channel.edit_permission.save()
 
-        # Update contents
-        sms_collection_media_ids = [
-            int(media_id.strip())
-            for media_id in jwp.parse_custom_field(
-                'media_ids', custom.get('sms_media_ids', 'media_ids::')
-            ).split(',') if media_id.strip() != ''
-        ]
-        collection_media_ids = (
-            mpmodels.MediaItem.objects.filter(sms__id__in=sms_collection_media_ids).only('id')
-        )
-        channel.items.set(collection_media_ids)
-
         # Update associated SMS collection (if any)
         sms_collection_id = channel_data.collection_id
         if sms_collection_id is not None:
+            # Firstly, form a query for all media items whose SMS collection id matches this
+            # channel and update the channel items
+            channel_items = mpmodels.MediaItem.objects.filter(
+                jwp__key__in=smsjwpmodels.CachedResource.objects.filter(
+                    data__custom__sms_collection_id='collection:{}:'.format(sms_collection_id)
+                ).values('key')
+            )
+            channel.items.set(channel_items.only('id'))
+
             # Get or create associated SMS collection. Note that hasattr is recommended in the
             # Django docs as a way to determine if a related objects exists.
             # https://docs.djangoproject.com/en/dev/topics/db/examples/one_to_one/
@@ -398,10 +395,11 @@ def update_related_models_from_cache(update_all_videos=False):
 
             sms_channel.save()
 
-            # Update the Playlist
+            # Update the Playlist. Note that we do not preserve the original ordering from the SMS.
+            # If we have confidence in sms_media_ids props, we should use them.
             sms_channel.playlist.title = channel.title
             sms_channel.playlist.description = channel.description
-            sms_channel.playlist.media_items = [item.id for item in collection_media_ids]
+            sms_channel.playlist.media_items = [item.id for item in channel_items.only('id')]
             sms_channel.playlist.save()
         else:
             # If there is no associated SMS collection, make sure that this channel doesn't have

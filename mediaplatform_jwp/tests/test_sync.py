@@ -250,9 +250,9 @@ class SyncTestCase(TestCase):
         """If a new video and channel appears on JWP, objects are created."""
         self.assertEqual(mpmodels.MediaItem.objects.count(), 0)
         set_resources_and_sync(
-            [make_video(title='test title', media_id='1')],
+            [make_video(title='test title', media_id='1', collection_id='2')],
             [make_channel(
-                title='test channel', media_ids=['1'], collection_id='2',
+                title='test channel', collection_id='2',
                 instid='UIS',
             )],
         )
@@ -267,11 +267,10 @@ class SyncTestCase(TestCase):
         """If a new video and channel appears on JWP, objects are created."""
         self.assertEqual(mpmodels.MediaItem.objects.count(), 0)
         set_resources_and_sync(
-            [make_video(title='test title', media_id='1')],
+            [make_video(title='test title', media_id='1', collection_id='2')],
             [make_channel(
                 title='Didius Julianus',
                 description='What evil have I done?',
-                media_ids=['1'],
                 collection_id='2',
                 instid='UIS',
             )],
@@ -287,16 +286,16 @@ class SyncTestCase(TestCase):
     def test_adding_media_to_channel(self):
         """If a new video and channel appears on JWP, objects are created."""
         videos = [
-            make_video(title='test title', media_id='1'),
+            make_video(title='test title', media_id='1', collection_id='3'),
             make_video(title='test title 2', media_id='2'),
         ]
-        channels = [make_channel(title='test channel', media_ids=['1'], collection_id='3')]
+        channels = [make_channel(title='test channel', collection_id='3')]
         set_resources_and_sync(videos, channels)
         c = mpmodels.Channel.objects.filter(sms__id='3').first()
         self.assertIsNotNone(c)
         self.assertEqual(len(c.items.all()), 1)
-        channels[0]['custom']['sms_media_ids'] = 'media_ids:1,2:'
-        channels[0]['updated'] += 1
+        videos[1]['custom']['sms_collection_id'] = 'collection:3:'
+        videos[1]['updated'] += 1
         set_resources_and_sync(videos, channels)
         self.assertEqual(len(c.items.all()), 2)
         # also check playlist
@@ -305,13 +304,13 @@ class SyncTestCase(TestCase):
 
     def test_edit_acls(self):
         videos = [
-            make_video(title='test title 1', media_id='1'),
-            make_video(title='test title 2', media_id='2'),
+            make_video(title='test title 1', media_id='1', collection_id='3'),
+            make_video(title='test title 2', media_id='2', collection_id='4'),
         ]
         channels = [
-            make_channel(title='test channel 1', media_ids=['1'], collection_id='3',
+            make_channel(title='test channel 1', collection_id='3',
                          groupid='01234'),
-            make_channel(title='test channel 2', media_ids=['2'], collection_id='4'),
+            make_channel(title='test channel 2', collection_id='4'),
         ]
 
         channels[0]['custom']['sms_created_by'] = 'created_by:spqr1:'
@@ -335,10 +334,10 @@ class SyncTestCase(TestCase):
         """If a new video and channel appears on JWP, objects are created."""
         last_updated_at = timezone.now()
         videos = [
-            make_video(title='test title', media_id='1'),
+            make_video(title='test title', media_id='1', collection_id='2'),
         ]
         channels = [
-            make_channel(title='test channel', media_ids=['1'], collection_id='2',
+            make_channel(title='test channel', collection_id='2',
                          last_updated_at=last_updated_at)
         ]
         set_resources_and_sync(videos, channels)
@@ -349,10 +348,10 @@ class SyncTestCase(TestCase):
     def test_channel_update_with_sms_going_away(self):
         """Test that an SMS channel going away deletes it from the DB."""
         videos = [
-            make_video(title='test title', media_id='1'),
+            make_video(title='test title', media_id='1', collection_id='2'),
         ]
         channels = [
-            make_channel(title='test channel', media_ids=['1'], collection_id='2')
+            make_channel(title='test channel', collection_id='2')
         ]
         set_resources_and_sync(videos, channels)
         c1 = mpmodels.Channel.objects.get(jwp__key=channels[0].key)
@@ -421,6 +420,7 @@ def make_video(**kwargs):
     * created_by - CRSid of creator. maps to custom.sms_created_by defaults to not being present
     * last_updated_at - last update datetime on SMS. maps to custom.sms_last_updated_at
         defaults to not being present
+    * collection_id - maps to custom.sms_collection_id. defaults to not being present
 
     """
 
@@ -450,6 +450,9 @@ def make_video(**kwargs):
     if 'last_updated_at' in kwargs:
         custom['sms_last_updated_at'] = 'last_updated_at:{}:'.format(
             kwargs['last_updated_at'].isoformat())
+
+    if 'collection_id' in kwargs:
+        custom['sms_collection_id'] = 'collection:{}:'.format(kwargs['collection_id'])
 
     video = {
         'key': kwargs.get('key', secrets.token_urlsafe()),
