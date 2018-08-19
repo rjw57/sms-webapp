@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { Link } from 'react-router-dom'
+
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
@@ -42,7 +44,7 @@ const NavigationPanel = ({ profile, classes }) => <div className={ classes.root 
   </div>
   <Divider />
   <List>
-    <ListItem button component='a' href='/'>
+    <ListItem button component={ Link } to='/'>
       <ListItemText primary="Latest Media" />
     </ListItem>
     {

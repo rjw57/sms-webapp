@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { Link } from 'react-router-dom'
+
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Grid from '@material-ui/core/Grid';
 
@@ -24,8 +26,8 @@ const MediaList = ({
     mediaItemComponents = mediaItems.slice(0, maxItemCount).map(item => (
       <ButtonBase
         classes={{root: classes.buttonRoot}}
-        component='a'
-        href={item.url}
+        component={ Link }
+        to={ item.url }
       >
         <MediaItemCard
           classes={{root: classes.itemRoot}}
