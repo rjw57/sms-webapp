@@ -4,7 +4,13 @@
 # Additional requirements useful for developers of the webapp
 
 # Django debugging
-django-debug-toolbar
+
+## SQL EXPLAIN currently breaks on queries involving arrays. A PR is open on DDT
+## (https://github.com/jazzband/django-debug-toolbar/pull/1079). Until that is
+## merged, comment out the upstream DDT and install a local fork.
+
+# django-debug-toolbar
+git+https://github.com/rjw57/django-debug-toolbar@issue-769
 
 # Testing
 tox
