@@ -8,6 +8,8 @@ import MediaList from '../components/MediaList';
 import SearchResultsProvider, { withSearchResults } from '../providers/SearchResultsProvider';
 import Page from "../containers/Page";
 
+import MediaItems from '../containers/MediaItems';
+
 /**
  * The index page for the web application. Upon mount, it fetches a list of the latest media items
  * and shows them to the user. If the user searches, search results are fetched and displayed in a
@@ -25,25 +27,11 @@ class IndexPage extends Component {
     const search = params.get('q');
 
     this.state = {
-      // Is the latest media list loading.
-      latestMediaLoading: false,
-
-      // The latest media list response from the API, if any.
-      latestMediaResponse: null,
-
       // Is a search query defined/loading?
       searchQuery: search ? { search } : null,
     }
   }
 
-  componentWillMount() {
-    // As soon as the index page mounts, fetch the latest media.
-    this.setState({ latestMediaLoading: true });
-    mediaList({ ordering: '-publishedAt' }).then(
-      response => this.setState({ latestMediaResponse: response, latestMediaLoading: false }),
-      error => this.setState({ latestMediaResponse: null, latestMediaLoading: false })
-    );
-  }
 
   handleSearch(search) {
     this.setState({ searchQuery: { search } });
@@ -57,22 +45,22 @@ class IndexPage extends Component {
           <SearchResultsSection />
         </SearchResultsProvider>
 
-        <MediaListSection
-          title="Latest Media"
-          MediaListProps={{
-            contentLoading: latestMediaLoading,
-            maxItemCount: 18,
-            mediaItems: (
-              (latestMediaResponse && latestMediaResponse.results)
-              ? latestMediaResponse.results.map(mediaResourceToItem)
-              : []
-            ),
-          }}
-        />
+        <section>
+          <Typography variant='title'>Latest Media</Typography>
+          <MediaItems ordering='-publishedAt'>{
+            ({ mediaItems, isLoading }) => (
+              <MediaList contentLoading={isLoading} mediaItems={
+                (mediaItems || []).map(({ title, description, posterImageUrl, id }) => ({
+                  title, description, imageUrl: posterImageUrl, url: '/media/' + id
+                }))
+              }/>
+            )
+          }</MediaItems>
+        </section>
       </Page>
     );
+    }
   }
-}
 
 /**
  * If there are search results, this component shows a section with the current search results in
