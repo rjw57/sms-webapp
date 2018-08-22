@@ -10,6 +10,7 @@ import AnalyticsIcon from '@material-ui/icons/ShowChart';
 import EditIcon from '@material-ui/icons/Edit';
 
 import Page from '../containers/Page';
+import BodySection from '../components/BodySection';
 import RenderedMarkdown from '../components/RenderedMarkdown';
 import MediaItemProvider, { withMediaItem } from '../providers/MediaItemProvider';
 import {withProfile} from "../providers/ProfileProvider";
@@ -74,7 +75,7 @@ const MediaPageContents = ({ profile, item, classes }) => {
           </iframe>
         </div>
       </section>
-      <section className={ classes.mediaDetails }>
+      <BodySection classes={{ root: classes.mediaDetails }}>
         <Grid container spacing={16}>
           <Grid container item xs={12} md={9} lg={10}>
             <Grid item xs={12}>
@@ -84,7 +85,7 @@ const MediaPageContents = ({ profile, item, classes }) => {
               <RenderedMarkdown source={ item ? item.description : '' }/>
             </Grid>
           </Grid>
-          <Grid container item xs={12} md={3} lg={2} className={classes.buttonStack}>
+          <Grid item xs={12} md={3} lg={2} className={classes.buttonStack}>
             {
               source
               ?
@@ -124,7 +125,7 @@ const MediaPageContents = ({ profile, item, classes }) => {
             }
           </Grid>
         </Grid>
-      </section>
+      </BodySection>
     </div>
   );
 }
