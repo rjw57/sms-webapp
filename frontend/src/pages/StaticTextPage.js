@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import Fade from '@material-ui/core/Fade';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
@@ -10,35 +11,60 @@ import BodySection from '../components/BodySection';
 import RenderedMarkdown from '../components/RenderedMarkdown';
 
 class StaticTextPage extends React.Component {
-  state = { source: null };
+  state = {
+    fetchedContentUrl: null,
+    source: null,
+  }
 
   componentDidMount() {
-    // When the component mounts, scan the document for a script tag containing the markdown source
-    // for the page.
-    const bodyElement = document.getElementById('bodySource');
-    if(bodyElement) { this.setState({ source: bodyElement.text }); }
+    this.fetchContentIfNecesary();
+  }
+
+  componentDudUpdate() {
+    this.fetchContentIfNecesary();
+  }
+
+  fetchContentIfNecesary() {
+    const { contentUrl } = this.props;
+    const { fetchedContentUrl } = this.state;
+
+    // Don't need to do anything if the content URL has not changed since the last fetch.
+    if(contentUrl === fetchedContentUrl) { return; }
+
+    // After fetching, check the response was OK and for a URL which matches the latest prop. If
+    // so, update the state.
+    fetch(contentUrl)
+      .then(response => {
+        if(!response.ok) { throw new Error(`Error response from server: ${response.status}`); }
+        return response.text()
+      })
+      .then(source => (contentUrl === this.props.contentUrl) && this.setState({ source }));
   }
 
   render() {
     const { classes } = this.props;
     const { source } = this.state;
     return <Page gutterTop classes={{ gutterTop: classes.pageGutterTop }}>
-      <Grid container justify='center' className={ classes.container }>
-        <Grid item xl={4} lg={6} md={8} sm={10} xs={12}>
-          <BodySection
-            component={Paper}
-            componentProps={{ classes: { root: classes.paperRoot, rounded: classes.paperRounded } }}
-          >
-            <RenderedMarkdown source={ source || '' } />
-          </BodySection>
+      <Fade in={ Boolean(source) }>
+        <Grid container justify='center' className={ classes.container }>
+          <Grid item xl={4} lg={6} md={8} sm={10} xs={12}>
+            <BodySection
+              component={Paper}
+              componentProps={{ classes: { root: classes.paperRoot, rounded: classes.paperRounded } }}
+            >
+              <RenderedMarkdown source={ source || '' } />
+            </BodySection>
+          </Grid>
         </Grid>
-      </Grid>
-    </Page>
+      </Fade>
+    </Page>;
   }
 }
 
 StaticTextPage.propTypes = {
   classes: PropTypes.object.isRequired,
+
+  contentUrl: PropTypes.string.isRequired,
 };
 
 const styles = theme => ({

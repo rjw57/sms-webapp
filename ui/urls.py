@@ -45,9 +45,22 @@ urlpatterns = [
     ),
     path('playlists/<pk>', views.PlaylistView.as_view(), name='playlist'),
     path('playlists/<pk>/edit', views.PlaylistView.as_view(), name='playlist_edit'),
-    path('about', TemplateView.as_view(template_name="ui/about.html"), name='about'),
-    path('changelog', TemplateView.as_view(
-        template_name="ui/changelog.html", extra_context={'changelog': changelog}
-    ), name='changelog'),
+
+    # Static text pages
+    path('about', TemplateView.as_view(template_name="index.html"), name='about'),
+    path('changelog', TemplateView.as_view(template_name="index.html"), name='changelog'),
+
+    # Static text content.
+    #
+    # We expose static files through a redirect here to make sure we don't need to teleport
+    # knowledge about static file locations into the frontend. Static files may have content-hashed
+    # names, for example, which is only known to Django.
+    path('text/changelog.md', TemplateView.as_view(
+        template_name="ui/changelog.md", extra_context={'changelog': changelog},
+        content_type='text/markdown'
+    ), name='changelog_text'),
+    path('text/about.md', views.StaticFileView.as_view(path='ui/about.md'), name='about_text'),
+
+    # Home page
     path('', TemplateView.as_view(template_name="index.html"), name='home'),
 ]

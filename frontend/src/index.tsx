@@ -20,6 +20,9 @@ import ProfileProvider from './providers/ProfileProvider';
 
 import theme from './theme';
 
+const AboutPage = () => <StaticTextPage contentUrl="/text/about.md" />;
+const ChangelogPage = () => <StaticTextPage contentUrl="/text/changelog.md" />;
+
 ReactDOM.render(
   <BrowserRouter>
     <MuiThemeProvider theme={theme}>
@@ -38,8 +41,8 @@ ReactDOM.render(
           <Route exact={true} path="/playlists/:pk" component={PlaylistPage} />
         </Switch>
         <Route exact={true} path="/playlists/:pk/edit" component={PlaylistEditPage} />
-        <Route exact={true} path="/about" component={StaticTextPage} />
-        <Route exact={true} path="/changelog" component={StaticTextPage} />
+        <Route exact={true} path="/about" component={AboutPage} />
+        <Route exact={true} path="/changelog" component={ChangelogPage} />
       </ProfileProvider>
     </MuiThemeProvider>
   </BrowserRouter>,

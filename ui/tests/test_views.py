@@ -147,3 +147,14 @@ class IndexViewTestCase(ViewTestCase):
         with self.settings(GTAG_ID=gtag_id):
             r = self.client.get(reverse('ui:home'))
         self.assertIn(gtag_id, r.content.decode('utf8'))
+
+
+class StaticFileViewTestCase(ViewTestCase):
+    def test_about_view(self):
+        self.assert_redirects_to_static(reverse('ui:about_text'), 'ui/about.md')
+
+    def assert_redirects_to_static(self, url, path):
+        with mock.patch('django.templatetags.static.static', return_value='/xxx') as static:
+            r = self.client.get(url)
+        static.assert_called_with(path)
+        self.assertRedirects(r, '/xxx', fetch_redirect_response=False)
