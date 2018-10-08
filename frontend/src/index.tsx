@@ -17,6 +17,7 @@ import PlaylistPage from './pages/PlaylistPage';
 import StaticTextPage from './pages/StaticTextPage';
 import UploadPage from './pages/UploadPage';
 
+import FetchProgress from './containers/FetchProgress';
 import Snackbar from "./containers/Snackbar";
 
 import ProfileProvider from './providers/ProfileProvider';
@@ -32,6 +33,9 @@ ReactDOM.render(
         { /* A default title for the page which can be overridden by specific pages. */ }
         <Helmet><title>The University of Cambridge Media Platform</title></Helmet>
         <CssBaseline />
+
+        <FetchProgress />
+
         <Route exact={true} path="/" component={IndexPage} />
         <Switch>
           <Route exact={true} path="/media/new" component={UploadPage} />
