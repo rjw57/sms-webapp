@@ -16,11 +16,11 @@ Including another URLconf
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
-from django.urls import path, include
+from django.urls import path, include, re_path
+from django.views.generic.base import RedirectView
 
 import automationcommon.views
 
-from . import apiurls
 from ui.sitemaps import sitemaps
 
 # Django debug toolbar is only installed in developer builds
@@ -39,7 +39,17 @@ urlpatterns = [
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
          name='django.contrib.sitemaps.views.sitemap'),
     path('robots.txt', include('robots.urls')),
-] + apiurls.urlpatterns
+
+    # For multiple versions of the API, the ordering here is important. The *bottom most* entry
+    # will become whatever reverse('api:....') returns.
+    # See: https://docs.djangoproject.com/en/2.1/topics/http/urls/#topics-http-reversing-url-namespaces  # noqa: E501
+    path('api/v1alpha1/', include('api.urls', namespace='v1alpha1')),
+
+    # Redirect swagger schema endpoint to default namespace.
+    re_path(
+        '^api/swagger(?P<format>\.json|\.yaml)$',
+        RedirectView.as_view(pattern_name='v1alpha1:schema')),
+]
 
 # Selectively enable django debug toolbar URLs. Only if the toolbar is
 # installed *and* DEBUG is True.

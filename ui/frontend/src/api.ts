@@ -195,7 +195,7 @@ export interface IAPIOptions {
   endpoint?: string;
 };
 
-const API_BASE = window.location.protocol + '//' + window.location.host + '/api'
+const API_BASE = window.location.protocol + '//' + window.location.host + '/api/v1alpha1'
 
 /** The various API endpoints */
 export const API_ENDPOINTS = {
